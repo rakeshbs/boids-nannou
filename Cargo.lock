@@ -3,13 +3,6 @@
 version = 3
 
 [[package]]
-name = "Steering"
-version = "0.1.0"
-dependencies = [
- "nannou",
-]
-
-[[package]]
 name = "ab_glyph_rasterizer"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1877,6 +1870,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f77b6b07e862c66a9f3e62a07588fee67cd90a9135a2b942409f195507b4fb51"
 dependencies = [
  "byteorder",
+]
+
+[[package]]
+name = "steering"
+version = "0.1.0"
+dependencies = [
+ "nannou",
 ]
 
 [[package]]
