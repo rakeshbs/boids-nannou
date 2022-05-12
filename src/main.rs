@@ -16,43 +16,49 @@ fn main() {
 struct Vehicle {
     position: Vec2,
     velocity: Vec2,
+    radius: f32,
 }
 
 impl Vehicle {
-    pub fn new(p: Vec2, v: Vec2) -> Self {
-        Vehicle {
-            position: p,
-            velocity: v,
-        }
-    }
-
-    pub fn update(&mut self) {
+    pub fn update(&mut self, bounds: Rect) {
         self.position = self.position.add(self.velocity);
+        if self.position.x + self.radius < -(bounds.w() / 2.0) {
+            self.position.x = bounds.w() / 2.0 + self.radius
+        } else if self.position.x - self.radius > (bounds.w() / 2.0) {
+            self.position.x = -bounds.w() / 2.0 - self.radius
+        }
+        if self.position.y + self.radius < -(bounds.h() / 2.0) {
+            self.position.y = bounds.h() / 2.0 + self.radius
+        } else if self.position.y - self.radius > (bounds.h() / 2.0) {
+            self.position.y = -bounds.h() / 2.0 - self.radius
+        }
     }
 }
 
 struct Model {
+    window_bounds: Rect,
     vehicles: Vec<Vehicle>,
 }
 
 impl Model {
     pub fn update(&mut self) {
         for v in &mut self.vehicles {
-            v.update();
+            v.update(self.window_bounds);
         }
     }
 }
 
 fn model(app: &App) -> Model {
     let _window = app.new_window().view(view).build().unwrap();
-    let w = app.window(_window).unwrap();
-    let half_width = 100.0;
-    let half_height = 100.0;
+    let w_rect = app.window_rect();
+    let half_width = w_rect.w() / 2.0;
+    let half_height = w_rect.h() / 2.0;
     dbg!("Window Size {}{}", half_width, half_height);
     let mut model = Model {
+        window_bounds: w_rect,
         vehicles: Vec::new(),
     };
-    for i in (1..10) {
+    for i in (1..100) {
         let rx = rand::random_range::<f32>(-half_width, half_width);
         let ry = rand::random_range::<f32>(-half_height, half_height);
         let pt = Vec2::new(rx, ry);
@@ -62,6 +68,7 @@ fn model(app: &App) -> Model {
         model.vehicles.push(Vehicle {
             position: pt,
             velocity: v,
+            radius: 5.0,
         });
     }
     model
@@ -77,9 +84,8 @@ fn view(app: &App, _model: &Model, frame: Frame) {
     for v in &_model.vehicles {
         draw.ellipse()
             .xy(v.position)
-            .w_h(10.0, 10.0)
+            .w_h(v.radius, v.radius)
             .color(STEELBLUE);
     }
-    //draw.ellipse().color(STEELBLUE);
     draw.to_frame(app, &frame).unwrap();
 }
