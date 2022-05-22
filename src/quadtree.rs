@@ -1,7 +1,12 @@
-use nannou::{color::WHITE, prelude::Vec2};
+use nannou::{
+    color::{BLUE, WHITE},
+    draw::mesh::vertex::Color,
+    prelude::Vec2,
+};
 
-const MAX_CAPACITY_QUADTREE: usize = 6;
+const MAX_CAPACITY_QUADTREE: usize = 1;
 const MIN_SQUARE_SIZE: usize = 5;
+#[derive(Debug)]
 pub struct Rectangle {
     pub x: f32,
     pub y: f32,
@@ -26,6 +31,11 @@ impl Rectangle {
             || rect.y + rect.height < self.y)
     }
     pub fn point_inside_rect(&self, point: Vec2) -> bool {
+        //self.x - self.width / 2.0 <= point.x
+        //&& self.y - self.width / 2.0 <= point.y
+        //&& self.x + self.width / 2.0 > point.x
+        //&& self.y + self.height / 2.0 > point.y
+
         self.x <= point.x
             && self.y <= point.y
             && self.x + self.width > point.x
@@ -39,6 +49,7 @@ pub trait HasLocation {
     }
 }
 
+#[derive(Debug)]
 pub struct QuadTree<'a, T: 'a + HasLocation> {
     boundary: Rectangle,
     elements: Vec<&'a T>,
@@ -84,9 +95,13 @@ impl<'a, T: HasLocation> QuadTree<'a, T> {
         }
     }
 
-    fn draw_node(node: &Option<Box<QuadTree<'a, T>>>, draw: &nannou::prelude::Draw) {
+    fn draw_node(
+        node: &Option<Box<QuadTree<'a, T>>>,
+        draw: &nannou::prelude::Draw,
+        rect: &Rectangle,
+    ) {
         if let Some(n) = node {
-            n.draw(draw)
+            n.draw(draw, rect);
         }
     }
 
@@ -102,35 +117,47 @@ impl<'a, T: HasLocation> QuadTree<'a, T> {
     }
 
     pub fn query(&self, rect: &Rectangle, mut found: Vec<&'a T>) -> Vec<&'a T> {
-        if !self.boundary.intersects(&rect) {}
-        for element in &self.elements {
-            let point = element.get_location();
-            if rect.point_inside_rect(point) {
-                found.push(element);
+        if self.boundary.intersects(&rect) {
+            for element in &self.elements {
+                let point = element.get_location();
+                if rect.point_inside_rect(point) {
+                    found.push(element);
+                }
                 if self.is_divided {
                     found = QuadTree::query_node(&self.top_left, rect, found);
                     found = QuadTree::query_node(&self.top_right, rect, found);
-                    found = QuadTree::query_node(&self.bottom_right, rect, found);
                     found = QuadTree::query_node(&self.bottom_left, rect, found);
+                    found = QuadTree::query_node(&self.bottom_right, rect, found);
                 }
             }
         }
         found
     }
 
-    pub fn draw(&self, draw: &nannou::prelude::Draw) {
+    pub fn draw(&self, draw: &nannou::prelude::Draw, rect: &Rectangle) {
+        let w = self.boundary.width;
+        let h = self.boundary.height;
         draw.rect()
-            .x_y(self.boundary.x, self.boundary.y)
+            .x_y(self.boundary.x + w / 2.0, self.boundary.y + h / 2.0)
             .width(self.boundary.width)
             .height(self.boundary.height)
             .no_fill()
             .stroke_weight(1.0)
-            .stroke_color(WHITE);
+            .stroke_color(Color::new(1.0, 1.0, 1.0, 0.3));
+        if self.elements.len() > 0 {
+            //draw.rect()
+            //.x_y(self.boundary.x - w / 2.0, self.boundary.y - h / 2.0)
+            //.width(self.boundary.width)
+            //.height(self.boundary.height)
+            //.no_fill()
+            //.stroke_weight(1.0)
+            //.stroke_color(BLUE);
+        }
         if self.is_divided {
-            QuadTree::draw_node(&self.top_right, draw);
-            QuadTree::draw_node(&self.top_left, draw);
-            QuadTree::draw_node(&self.bottom_right, draw);
-            QuadTree::draw_node(&self.bottom_left, draw);
+            QuadTree::draw_node(&self.top_right, draw, rect);
+            QuadTree::draw_node(&self.top_left, draw, rect);
+            QuadTree::draw_node(&self.bottom_right, draw, rect);
+            QuadTree::draw_node(&self.bottom_left, draw, rect);
         }
     }
 
