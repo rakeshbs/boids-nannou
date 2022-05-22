@@ -1,11 +1,12 @@
 use nannou::{color::WHITE, prelude::Vec2};
 
 const MAX_CAPACITY_QUADTREE: usize = 6;
+const MIN_SQUARE_SIZE: usize = 5;
 pub struct Rectangle {
-    x: f32,
-    y: f32,
-    width: f32,
-    height: f32,
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
 }
 
 impl Rectangle {
@@ -16,6 +17,13 @@ impl Rectangle {
             width,
             height,
         }
+    }
+
+    pub fn intersects(&self, rect: &Rectangle) -> bool {
+        !(rect.x > self.x + self.width
+            || rect.x + rect.width < self.x
+            || rect.y > self.y + self.height
+            || rect.y + rect.height < self.y)
     }
     pub fn point_inside_rect(&self, point: Vec2) -> bool {
         self.x <= point.x
@@ -82,7 +90,33 @@ impl<'a, T: HasLocation> QuadTree<'a, T> {
         }
     }
 
-    pub fn query(&self, rect: Rectangle) {}
+    fn query_node(
+        node: &Option<Box<QuadTree<'a, T>>>,
+        rect: &Rectangle,
+        mut found: Vec<&'a T>,
+    ) -> Vec<&'a T> {
+        if let Some(n) = node {
+            found = n.query(rect, found);
+        }
+        found
+    }
+
+    pub fn query(&self, rect: &Rectangle, mut found: Vec<&'a T>) -> Vec<&'a T> {
+        if !self.boundary.intersects(&rect) {}
+        for element in &self.elements {
+            let point = element.get_location();
+            if rect.point_inside_rect(point) {
+                found.push(element);
+                if self.is_divided {
+                    found = QuadTree::query_node(&self.top_left, rect, found);
+                    found = QuadTree::query_node(&self.top_right, rect, found);
+                    found = QuadTree::query_node(&self.bottom_right, rect, found);
+                    found = QuadTree::query_node(&self.bottom_left, rect, found);
+                }
+            }
+        }
+        found
+    }
 
     pub fn draw(&self, draw: &nannou::prelude::Draw) {
         draw.rect()

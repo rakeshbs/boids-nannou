@@ -25,7 +25,7 @@ struct Model {
 
 impl Model {
     pub fn update(&mut self, app: &App) {
-        self.mouse_position = app.mouse.position();
+        //self.mouse_position = app.mouse.position();
         let others: Vec<Vec2> = self.vehicles.iter().map(|v| v.position).collect();
         for v in &mut self.vehicles {
             v.steer(self.mouse_position);
@@ -44,7 +44,7 @@ fn model(app: &App) -> Model {
     let mut model = Model {
         window_bounds: w_rect,
         vehicles: Vec::new(),
-        mouse_position: app.mouse.position(),
+        mouse_position: Vec2::new(0.0, 0.0),
     };
     for i in 1..100 {
         let rx = rand::random_range::<f32>(-half_width, half_width);
@@ -58,7 +58,7 @@ fn model(app: &App) -> Model {
             velocity: v,
             radius: 3.0,
             acceleration: Vec2::new(0.0, 0.0),
-            max_speed: 4.0,
+            max_speed: 1.0,
             max_force: 0.5,
             index: i,
         });
@@ -87,5 +87,26 @@ fn view(app: &App, _model: &Model, frame: Frame) {
         draw.ellipse().radius(4.0).xy(v.position).color(STEELBLUE);
     }
     quadtree.draw(&draw);
+    let w = 100.0;
+    let x = app.mouse.x;
+    let y = app.mouse.y;
+    let rect = Rectangle {
+        x,
+        y,
+        width: w,
+        height: w,
+    };
+    let mut found: Vec<&Vehicle> = Vec::new();
+    found = quadtree.query(&rect, found);
+    for v in found {
+        draw.ellipse().radius(4.0).xy(v.position).color(YELLOW);
+    }
+    draw.rect()
+        .x_y(x + w / 2.0, y + w / 2.0)
+        .width(w)
+        .height(w)
+        .no_fill()
+        .stroke_weight(1.0)
+        .stroke_color(RED);
     draw.to_frame(app, &frame).unwrap();
 }
