@@ -31,11 +31,6 @@ impl Rectangle {
             || rect.y + rect.height < self.y)
     }
     pub fn point_inside_rect(&self, point: Vec2) -> bool {
-        //self.x - self.width / 2.0 <= point.x
-        //&& self.y - self.width / 2.0 <= point.y
-        //&& self.x + self.width / 2.0 > point.x
-        //&& self.y + self.height / 2.0 > point.y
-
         self.x <= point.x
             && self.y <= point.y
             && self.x + self.width > point.x
@@ -43,28 +38,22 @@ impl Rectangle {
     }
 }
 
-pub trait HasLocation {
-    fn get_location(&self) -> Vec2 {
-        return Vec2::new(0.0, 0.0);
-    }
-}
-
 #[derive(Debug)]
-pub struct QuadTree<'a, T: 'a + HasLocation> {
+pub struct QuadTree {
     boundary: Rectangle,
-    elements: Vec<&'a T>,
+    points: Vec<Vec2>,
     is_divided: bool,
-    top_right: Option<Box<QuadTree<'a, T>>>,
-    top_left: Option<Box<QuadTree<'a, T>>>,
-    bottom_right: Option<Box<QuadTree<'a, T>>>,
-    bottom_left: Option<Box<QuadTree<'a, T>>>,
+    top_right: Option<Box<QuadTree>>,
+    top_left: Option<Box<QuadTree>>,
+    bottom_right: Option<Box<QuadTree>>,
+    bottom_left: Option<Box<QuadTree>>,
 }
 
-impl<'a, T: HasLocation> QuadTree<'a, T> {
+impl QuadTree {
     pub fn new(boundary: Rectangle) -> Self {
         QuadTree {
             boundary,
-            elements: Vec::new(),
+            points: Vec::new(),
             is_divided: false,
             top_left: None,
             top_right: None,
@@ -89,46 +78,41 @@ impl<'a, T: HasLocation> QuadTree<'a, T> {
         self.bottom_right = Some(Box::new(QuadTree::new(br)));
     }
 
-    fn insert_into_node(node: &mut Option<Box<QuadTree<'a, T>>>, element: &'a T) {
+    fn insert_into_node(node: &mut Option<Box<QuadTree>>, point: Vec2) {
         if let Some(n) = node {
-            n.insert(element);
+            n.insert(point);
         }
     }
 
-    fn draw_node(
-        node: &Option<Box<QuadTree<'a, T>>>,
-        draw: &nannou::prelude::Draw,
-        rect: &Rectangle,
-    ) {
+    fn draw_node(node: &Option<Box<QuadTree>>, draw: &nannou::prelude::Draw, rect: &Rectangle) {
         if let Some(n) = node {
             n.draw(draw, rect);
         }
     }
 
     fn query_node(
-        node: &Option<Box<QuadTree<'a, T>>>,
+        node: &Option<Box<QuadTree>>,
         rect: &Rectangle,
-        mut found: Vec<&'a T>,
-    ) -> Vec<&'a T> {
+        mut found: Vec<Vec2>,
+    ) -> Vec<Vec2> {
         if let Some(n) = node {
             found = n.query(rect, found);
         }
         found
     }
 
-    pub fn query(&self, rect: &Rectangle, mut found: Vec<&'a T>) -> Vec<&'a T> {
+    pub fn query(&self, rect: &Rectangle, mut found: Vec<(Vec2)>) -> Vec<(Vec2)> {
         if self.boundary.intersects(&rect) {
-            for element in &self.elements {
-                let point = element.get_location();
-                if rect.point_inside_rect(point) {
-                    found.push(element);
+            self.points.iter().enumerate().for_each(|(i, point)| {
+                if rect.point_inside_rect(*point) {
+                    found.push(*point);
                 }
-                if self.is_divided {
-                    found = QuadTree::query_node(&self.top_left, rect, found);
-                    found = QuadTree::query_node(&self.top_right, rect, found);
-                    found = QuadTree::query_node(&self.bottom_left, rect, found);
-                    found = QuadTree::query_node(&self.bottom_right, rect, found);
-                }
+            });
+            if self.is_divided {
+                found = QuadTree::query_node(&self.top_left, rect, found);
+                found = QuadTree::query_node(&self.top_right, rect, found);
+                found = QuadTree::query_node(&self.bottom_left, rect, found);
+                found = QuadTree::query_node(&self.bottom_right, rect, found);
             }
         }
         found
@@ -144,15 +128,6 @@ impl<'a, T: HasLocation> QuadTree<'a, T> {
             .no_fill()
             .stroke_weight(1.0)
             .stroke_color(Color::new(1.0, 1.0, 1.0, 0.3));
-        if self.elements.len() > 0 {
-            //draw.rect()
-            //.x_y(self.boundary.x - w / 2.0, self.boundary.y - h / 2.0)
-            //.width(self.boundary.width)
-            //.height(self.boundary.height)
-            //.no_fill()
-            //.stroke_weight(1.0)
-            //.stroke_color(BLUE);
-        }
         if self.is_divided {
             QuadTree::draw_node(&self.top_right, draw, rect);
             QuadTree::draw_node(&self.top_left, draw, rect);
@@ -161,20 +136,19 @@ impl<'a, T: HasLocation> QuadTree<'a, T> {
         }
     }
 
-    pub fn insert(&mut self, element: &'a T) {
-        let point = element.get_location();
+    pub fn insert(&mut self, point: Vec2) {
         if self.boundary.point_inside_rect(point) {
-            if self.elements.len() < MAX_CAPACITY_QUADTREE {
-                self.elements.push(element);
+            if self.points.len() < MAX_CAPACITY_QUADTREE {
+                self.points.push(point);
             } else {
                 if !self.is_divided {
                     self.split();
                     self.is_divided = true;
                 }
-                QuadTree::insert_into_node(&mut self.top_left, element);
-                QuadTree::insert_into_node(&mut self.top_right, element);
-                QuadTree::insert_into_node(&mut self.bottom_left, element);
-                QuadTree::insert_into_node(&mut self.bottom_right, element);
+                QuadTree::insert_into_node(&mut self.top_left, point);
+                QuadTree::insert_into_node(&mut self.top_right, point);
+                QuadTree::insert_into_node(&mut self.bottom_left, point);
+                QuadTree::insert_into_node(&mut self.bottom_right, point);
             }
         }
     }

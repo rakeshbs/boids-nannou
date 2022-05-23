@@ -1,8 +1,6 @@
 use nannou::prelude::*;
 use std::ops::{Add, Sub};
 
-use crate::quadtree::HasLocation;
-
 pub struct Vehicle {
     pub position: Vec2,
     pub velocity: Vec2,
@@ -11,12 +9,6 @@ pub struct Vehicle {
     pub max_force: f32,
     pub radius: f32,
     pub index: i32,
-}
-
-impl HasLocation for Vehicle {
-    fn get_location(&self) -> Vec2 {
-        self.position
-    }
 }
 
 impl Vehicle {
@@ -39,7 +31,7 @@ impl Vehicle {
 
         if min_dist < 10000000.0 {
             let mut avoid = self.velocity.add(self.position.sub(min_position));
-            avoid = 3.0 * avoid.clamp_length_max(self.max_force);
+            avoid = 5.0 * avoid.clamp_length_max(self.max_force);
             &self.apply_force(avoid);
         }
     }
