@@ -6,7 +6,7 @@ use nannou::{
 
 const MAX_CAPACITY_QUADTREE: usize = 1;
 const MIN_SQUARE_SIZE: usize = 5;
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Rectangle {
     pub x: f32,
     pub y: f32,
@@ -38,10 +38,12 @@ impl Rectangle {
     }
 }
 
-#[derive(Debug)]
+pub trait QuadTreeNodeData {}
+
 pub struct QuadTree {
     boundary: Rectangle,
     points: Vec<Vec2>,
+    indices: Vec<usize>,
     is_divided: bool,
     top_right: Option<Box<QuadTree>>,
     top_left: Option<Box<QuadTree>>,
@@ -54,6 +56,7 @@ impl QuadTree {
         QuadTree {
             boundary,
             points: Vec::new(),
+            indices: Vec::new(),
             is_divided: false,
             top_left: None,
             top_right: None,
@@ -78,9 +81,9 @@ impl QuadTree {
         self.bottom_right = Some(Box::new(QuadTree::new(br)));
     }
 
-    fn insert_into_node(node: &mut Option<Box<QuadTree>>, point: Vec2) {
+    fn insert_into_node(node: &mut Option<Box<QuadTree>>, point: Vec2, index: usize) {
         if let Some(n) = node {
-            n.insert(point);
+            n.insert(point, index);
         }
     }
 
@@ -92,20 +95,24 @@ impl QuadTree {
 
     fn query_node(
         node: &Option<Box<QuadTree>>,
-        rect: &Rectangle,
-        mut found: Vec<Vec2>,
-    ) -> Vec<Vec2> {
+        rect: Rectangle,
+        mut found: Vec<(Vec2, usize)>,
+    ) -> Vec<(Vec2, usize)> {
         if let Some(n) = node {
             found = n.query(rect, found);
         }
         found
     }
 
-    pub fn query(&self, rect: &Rectangle, mut found: Vec<(Vec2)>) -> Vec<(Vec2)> {
+    pub fn query<'a>(
+        &'a self,
+        rect: Rectangle,
+        mut found: Vec<(Vec2, usize)>,
+    ) -> Vec<(Vec2, usize)> {
         if self.boundary.intersects(&rect) {
             self.points.iter().enumerate().for_each(|(i, point)| {
                 if rect.point_inside_rect(*point) {
-                    found.push(*point);
+                    found.push((*point, self.indices[i]));
                 }
             });
             if self.is_divided {
@@ -136,19 +143,20 @@ impl QuadTree {
         }
     }
 
-    pub fn insert(&mut self, point: Vec2) {
+    pub fn insert(&mut self, point: Vec2, index: usize) {
         if self.boundary.point_inside_rect(point) {
             if self.points.len() < MAX_CAPACITY_QUADTREE {
                 self.points.push(point);
+                self.indices.push(index);
             } else {
                 if !self.is_divided {
                     self.split();
                     self.is_divided = true;
                 }
-                QuadTree::insert_into_node(&mut self.top_left, point);
-                QuadTree::insert_into_node(&mut self.top_right, point);
-                QuadTree::insert_into_node(&mut self.bottom_left, point);
-                QuadTree::insert_into_node(&mut self.bottom_right, point);
+                QuadTree::insert_into_node(&mut self.top_left, point, index);
+                QuadTree::insert_into_node(&mut self.top_right, point, index);
+                QuadTree::insert_into_node(&mut self.bottom_left, point, index);
+                QuadTree::insert_into_node(&mut self.bottom_right, point, index);
             }
         }
     }
