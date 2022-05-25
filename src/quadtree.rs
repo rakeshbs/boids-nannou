@@ -1,11 +1,6 @@
-use nannou::{
-    color::{BLUE, WHITE},
-    draw::mesh::vertex::Color,
-    prelude::Vec2,
-};
+use nannou::{draw::mesh::vertex::Color, prelude::Vec2};
 
 const MAX_CAPACITY_QUADTREE: usize = 1;
-const MIN_SQUARE_SIZE: usize = 5;
 #[derive(Debug, Copy, Clone)]
 pub struct Rectangle {
     pub x: f32,
@@ -37,8 +32,6 @@ impl Rectangle {
             && self.y + self.height > point.y
     }
 }
-
-pub trait QuadTreeNodeData {}
 
 pub struct QuadTree {
     boundary: Rectangle,
@@ -87,9 +80,9 @@ impl QuadTree {
         }
     }
 
-    fn draw_node(node: &Option<Box<QuadTree>>, draw: &nannou::prelude::Draw, rect: &Rectangle) {
+    fn draw_node(node: &Option<Box<QuadTree>>, draw: &nannou::prelude::Draw) {
         if let Some(n) = node {
-            n.draw(draw, rect);
+            n.draw(draw);
         }
     }
 
@@ -125,7 +118,7 @@ impl QuadTree {
         found
     }
 
-    pub fn draw(&self, draw: &nannou::prelude::Draw, rect: &Rectangle) {
+    pub fn draw(&self, draw: &nannou::prelude::Draw) {
         let w = self.boundary.width;
         let h = self.boundary.height;
         draw.rect()
@@ -136,10 +129,10 @@ impl QuadTree {
             .stroke_weight(1.0)
             .stroke_color(Color::new(1.0, 1.0, 1.0, 0.3));
         if self.is_divided {
-            QuadTree::draw_node(&self.top_right, draw, rect);
-            QuadTree::draw_node(&self.top_left, draw, rect);
-            QuadTree::draw_node(&self.bottom_right, draw, rect);
-            QuadTree::draw_node(&self.bottom_left, draw, rect);
+            QuadTree::draw_node(&self.top_right, draw);
+            QuadTree::draw_node(&self.top_left, draw);
+            QuadTree::draw_node(&self.bottom_right, draw);
+            QuadTree::draw_node(&self.bottom_left, draw);
         }
     }
 
