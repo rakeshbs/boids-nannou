@@ -33,23 +33,33 @@ impl Rectangle {
     }
 }
 
-pub struct QuadTree {
-    boundary: Rectangle,
-    points: Vec<Vec2>,
-    indices: Vec<usize>,
-    is_divided: bool,
-    top_right: Option<Box<QuadTree>>,
-    top_left: Option<Box<QuadTree>>,
-    bottom_right: Option<Box<QuadTree>>,
-    bottom_left: Option<Box<QuadTree>>,
+pub trait HasLocation {
+    fn get_location(&self) -> Vec2;
 }
 
-impl QuadTree {
+pub struct QuadTree<'a, T>
+where
+    T: HasLocation,
+{
+    boundary: Rectangle,
+    points: Vec<Vec2>,
+    objects: Vec<&'a T>,
+    is_divided: bool,
+    top_right: Option<Box<QuadTree<'a, T>>>,
+    top_left: Option<Box<QuadTree<'a, T>>>,
+    bottom_right: Option<Box<QuadTree<'a, T>>>,
+    bottom_left: Option<Box<QuadTree<'a, T>>>,
+}
+
+impl<'a, T> QuadTree<'a, T>
+where
+    T: HasLocation,
+{
     pub fn new(boundary: Rectangle) -> Self {
         QuadTree {
             boundary,
             points: Vec::new(),
-            indices: Vec::new(),
+            objects: Vec::new(),
             is_divided: false,
             top_left: None,
             top_right: None,
@@ -74,38 +84,22 @@ impl QuadTree {
         self.bottom_right = Some(Box::new(QuadTree::new(br)));
     }
 
-    fn insert_into_node(node: &mut Option<Box<QuadTree>>, point: Vec2, index: usize) {
-        if let Some(n) = node {
-            n.insert(point, index);
-        }
-    }
-
-    fn draw_node(node: &Option<Box<QuadTree>>, draw: &nannou::prelude::Draw) {
-        if let Some(n) = node {
-            n.draw(draw);
-        }
-    }
-
     fn query_node(
-        node: &Option<Box<QuadTree>>,
+        node: &Option<Box<QuadTree<'a, T>>>,
         rect: Rectangle,
-        mut found: Vec<(Vec2, usize)>,
-    ) -> Vec<(Vec2, usize)> {
+        mut found: Vec<&'a T>,
+    ) -> Vec<&'a T> {
         if let Some(n) = node {
             found = n.query(rect, found);
         }
         found
     }
 
-    pub fn query<'a>(
-        &'a self,
-        rect: Rectangle,
-        mut found: Vec<(Vec2, usize)>,
-    ) -> Vec<(Vec2, usize)> {
+    pub fn query(&self, rect: Rectangle, mut found: Vec<&'a T>) -> Vec<&'a T> {
         if self.boundary.intersects(&rect) {
-            self.points.iter().enumerate().for_each(|(i, point)| {
-                if rect.point_inside_rect(*point) {
-                    found.push((*point, self.indices[i]));
+            self.objects.iter().for_each(|object| {
+                if rect.point_inside_rect(object.get_location()) {
+                    found.push(&object);
                 }
             });
             if self.is_divided {
@@ -116,6 +110,12 @@ impl QuadTree {
             }
         }
         found
+    }
+
+    fn draw_node(node: &Option<Box<QuadTree<T>>>, draw: &nannou::prelude::Draw) {
+        if let Some(n) = node {
+            n.draw(draw);
+        }
     }
 
     pub fn draw(&self, draw: &nannou::prelude::Draw) {
@@ -136,20 +136,25 @@ impl QuadTree {
         }
     }
 
-    pub fn insert(&mut self, point: Vec2, index: usize) {
-        if self.boundary.point_inside_rect(point) {
-            if self.points.len() < MAX_CAPACITY_QUADTREE {
-                self.points.push(point);
-                self.indices.push(index);
+    fn insert_into_node(node: &mut Option<Box<QuadTree<'a, T>>>, object: &'a T) {
+        if let Some(n) = node {
+            n.insert(object);
+        }
+    }
+
+    pub fn insert(&mut self, object: &'a T) {
+        if self.boundary.point_inside_rect(object.get_location()) {
+            if self.objects.len() < MAX_CAPACITY_QUADTREE {
+                self.objects.push(object);
             } else {
                 if !self.is_divided {
                     self.split();
                     self.is_divided = true;
                 }
-                QuadTree::insert_into_node(&mut self.top_left, point, index);
-                QuadTree::insert_into_node(&mut self.top_right, point, index);
-                QuadTree::insert_into_node(&mut self.bottom_left, point, index);
-                QuadTree::insert_into_node(&mut self.bottom_right, point, index);
+                QuadTree::insert_into_node(&mut self.top_left, object);
+                QuadTree::insert_into_node(&mut self.top_right, object);
+                QuadTree::insert_into_node(&mut self.bottom_left, object);
+                QuadTree::insert_into_node(&mut self.bottom_right, object);
             }
         }
     }

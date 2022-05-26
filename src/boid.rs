@@ -1,4 +1,4 @@
-use crate::quadtree::Rectangle;
+use crate::quadtree::*;
 use nannou::geom::Vec2;
 use std::ops::Add;
 
@@ -10,6 +10,12 @@ pub struct Boid {
     pub max_force: f32,
     pub radius: f32,
     pub index: i32,
+}
+
+impl HasLocation for Boid {
+    fn get_location(&self) -> Vec2 {
+        self.position
+    }
 }
 
 impl Boid {

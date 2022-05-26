@@ -60,19 +60,17 @@ impl Simulation {
         }
     }
 
-    fn seperation(&mut self) {}
-
     pub fn navigate(&mut self) {
-        let mut quadtree = QuadTree::new(self.bounds);
-        for (i, boid) in self.boids.iter().enumerate() {
-            quadtree.insert(boid.position, i);
+        let mut quadtree: QuadTree<Boid> = QuadTree::new(self.bounds);
+        for boid in self.boids.iter() {
+            quadtree.insert(boid);
         }
 
-        let forces: &Vec<Vec2> = &self
+        let forces: Vec<Vec2> = self
             .boids
             .iter()
             .map(|boid| {
-                let mut found: Vec<(Vec2, usize)> = Vec::new();
+                let mut found: Vec<&Boid> = Vec::new();
                 found = quadtree.query(Self::get_vehicle_rect(&boid), found);
 
                 let mut seperation = Vec2::new(0.0, 0.0);
@@ -81,8 +79,7 @@ impl Simulation {
                 let mut count_cohesion = 0;
                 let mut alignment = Vec2::new(0.0, 0.0);
                 let mut count_alignment = 0;
-                for (_, i) in &found {
-                    let other = &self.boids[*i];
+                for other in &found {
                     if other.index != boid.index {
                         let dist = other.position.distance(boid.position);
                         if dist <= BOID_AVOID_RADIUS {
