@@ -12,6 +12,7 @@ fn main() {
 struct Model {
     mouse_position: Vec2,
     simulation: Simulation,
+    counter: u32,
 }
 
 impl Model {
@@ -32,19 +33,28 @@ fn model(app: &App) -> Model {
     };
     dbg!(bounds);
     let model = Model {
-        simulation: Simulation::new(2500, bounds),
+        simulation: Simulation::new(5000, bounds),
         mouse_position: Vec2::new(0.0, 0.0),
+        counter: 0,
     };
     model
 }
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {
+    _model.counter += 1;
+    if _model.counter > 120 {
+        _model.counter = 0;
+    }
     _model.update(_app);
 }
 
 fn view(app: &App, _model: &Model, frame: Frame) {
     let draw = app.draw();
+    let w_rect = app.window_rect();
     draw.background().color(BLACK);
     _model.simulation.draw(&draw);
+    if _model.counter == 0 {
+        dbg!(app.fps());
+    }
     draw.to_frame(app, &frame).unwrap();
 }

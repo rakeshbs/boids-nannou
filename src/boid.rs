@@ -25,6 +25,23 @@ impl Boid {
         self.velocity = self.velocity.clamp_length_max(self.max_speed);
         self.position = self.position.add(self.velocity);
         self.acceleration = Vec2::new(0.0, 0.0);
+        self.reflect_bounds(bounds);
+    }
+
+    pub fn reflect_bounds(&mut self, bounds: Rectangle) {
+        if self.position.x + self.radius < bounds.x {
+            self.velocity = Vec2::new(-self.velocity.x, self.velocity.y);
+        } else if self.position.x - self.radius > bounds.x + bounds.width {
+            self.velocity = Vec2::new(-self.velocity.x, self.velocity.y);
+        }
+        if self.position.y + self.radius < bounds.y {
+            self.velocity = Vec2::new(self.velocity.x, -self.velocity.y);
+        } else if self.position.y - self.radius > bounds.y + bounds.height {
+            self.velocity = Vec2::new(self.velocity.x, -self.velocity.y);
+        }
+    }
+
+    pub fn check_bounds(&mut self, bounds: Rectangle) {
         if self.position.x + self.radius < bounds.x {
             self.position.x = bounds.x + bounds.width + self.radius
         } else if self.position.x - self.radius > bounds.x + bounds.width {

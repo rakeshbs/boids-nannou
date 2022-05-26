@@ -1,6 +1,6 @@
 use nannou::{draw::mesh::vertex::Color, prelude::Vec2};
 
-const MAX_CAPACITY_QUADTREE: usize = 1;
+const MAX_CAPACITY_QUADTREE: usize = 4;
 #[derive(Debug, Copy, Clone)]
 pub struct Rectangle {
     pub x: f32,

@@ -5,12 +5,12 @@ use nannou::{geom::*, rand};
 use std::ops::Div;
 use std::ops::{Add, Sub};
 
-const BOID_BOUNDS_SIZE: f32 = 30.0;
+const BOID_BOUNDS_SIZE: f32 = 15.0;
 const BOID_RADIUS: f32 = 1.5;
 const BOID_MAX_VELOCITY: f32 = 3.0;
 const BOID_MAX_FORCE: f32 = 1.0;
-const BOID_AVOID_RADIUS: f32 = 10.0;
-const BOID_FOLLOW_RADIUS: f32 = 30.0;
+const BOID_AVOID_RADIUS: f32 = 5.0;
+const BOID_FOLLOW_RADIUS: f32 = 15.0;
 
 pub struct Simulation {
     boid_count: i32,
