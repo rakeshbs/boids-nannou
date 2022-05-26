@@ -70,8 +70,7 @@ impl Simulation {
             .boids
             .iter()
             .map(|boid| {
-                let mut found: Vec<&Boid> = Vec::new();
-                found = quadtree.query(Self::get_vehicle_rect(&boid), found);
+                let found = quadtree.query(Self::get_vehicle_rect(&boid));
 
                 let mut seperation = Vec2::new(0.0, 0.0);
                 let mut count_seperation = 0;

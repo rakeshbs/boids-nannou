@@ -84,18 +84,13 @@ where
         self.bottom_right = Some(Box::new(QuadTree::new(br)));
     }
 
-    fn query_node(
-        node: &Option<Box<QuadTree<'a, T>>>,
-        rect: Rectangle,
-        mut found: Vec<&'a T>,
-    ) -> Vec<&'a T> {
-        if let Some(n) = node {
-            found = n.query(rect, found);
-        }
+    pub fn query(&self, rect: Rectangle) -> Vec<&'a T> {
+        let found: Vec<&T> = Vec::new();
+        self.query_tree(rect, found);
         found
     }
 
-    pub fn query(&self, rect: Rectangle, mut found: Vec<&'a T>) -> Vec<&'a T> {
+    fn query_tree(&self, rect: Rectangle, mut found: Vec<&'a T>) -> Vec<&'a T> {
         if self.boundary.intersects(&rect) {
             self.objects.iter().for_each(|object| {
                 if rect.point_inside_rect(object.get_location()) {
@@ -103,19 +98,13 @@ where
                 }
             });
             if self.is_divided {
-                found = QuadTree::query_node(&self.top_left, rect, found);
-                found = QuadTree::query_node(&self.top_right, rect, found);
-                found = QuadTree::query_node(&self.bottom_left, rect, found);
-                found = QuadTree::query_node(&self.bottom_right, rect, found);
+                found = self.top_left.unwrap().query_tree(rect, found);
+                found = self.top_right.unwrap().query_tree(rect, found);
+                found = self.bottom_left.unwrap().query_tree(rect, found);
+                found = self.bottom_right.unwrap().query_tree(rect, found);
             }
         }
         found
-    }
-
-    fn draw_node(node: &Option<Box<QuadTree<T>>>, draw: &nannou::prelude::Draw) {
-        if let Some(n) = node {
-            n.draw(draw);
-        }
     }
 
     pub fn draw(&self, draw: &nannou::prelude::Draw) {
@@ -129,16 +118,10 @@ where
             .stroke_weight(1.0)
             .stroke_color(Color::new(1.0, 1.0, 1.0, 0.3));
         if self.is_divided {
-            QuadTree::draw_node(&self.top_right, draw);
-            QuadTree::draw_node(&self.top_left, draw);
-            QuadTree::draw_node(&self.bottom_right, draw);
-            QuadTree::draw_node(&self.bottom_left, draw);
-        }
-    }
-
-    fn insert_into_node(node: &mut Option<Box<QuadTree<'a, T>>>, object: &'a T) {
-        if let Some(n) = node {
-            n.insert(object);
+            self.top_left.unwrap().draw(draw);
+            self.top_right.unwrap().draw(draw);
+            self.bottom_left.unwrap().draw(draw);
+            self.bottom_right.unwrap().draw(draw);
         }
     }
 
@@ -151,10 +134,10 @@ where
                     self.split();
                     self.is_divided = true;
                 }
-                QuadTree::insert_into_node(&mut self.top_left, object);
-                QuadTree::insert_into_node(&mut self.top_right, object);
-                QuadTree::insert_into_node(&mut self.bottom_left, object);
-                QuadTree::insert_into_node(&mut self.bottom_right, object);
+                self.top_left.unwrap().insert(object);
+                self.top_right.unwrap().insert(object);
+                self.bottom_left.unwrap().insert(object);
+                self.bottom_right.unwrap().insert(object);
             }
         }
     }
