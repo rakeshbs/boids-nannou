@@ -23,7 +23,12 @@ impl Model {
 }
 
 fn model(app: &App) -> Model {
-    let _window = app.new_window().view(view).build().unwrap();
+    let _window = app
+        .new_window()
+        .view(view)
+        .power_preference(wgpu::PowerPreference::HighPerformance)
+        .build()
+        .unwrap();
     let w_rect = app.window_rect();
     let bounds = Rectangle {
         x: -w_rect.w() / 2.0,
@@ -33,7 +38,7 @@ fn model(app: &App) -> Model {
     };
     dbg!(bounds);
     let model = Model {
-        simulation: Simulation::new(3000, bounds),
+        simulation: Simulation::new(15000, bounds),
         mouse_position: Vec2::new(0.0, 0.0),
         counter: 0,
     };

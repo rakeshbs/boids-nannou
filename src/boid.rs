@@ -31,7 +31,7 @@ impl Boid {
         self.velocity = self.velocity.clamp_length_max(self.max_speed);
         self.position = self.position.add(self.velocity);
         self.acceleration = Vec2::new(0.0, 0.0);
-        self.reflect_bounds(bounds);
+        self.loop_bounds(bounds);
     }
 
     pub fn reflect_bounds(&mut self, bounds: Rectangle) {
@@ -47,7 +47,7 @@ impl Boid {
         }
     }
 
-    pub fn check_bounds(&mut self, bounds: Rectangle) {
+    pub fn loop_bounds(&mut self, bounds: Rectangle) {
         if self.position.x + self.radius < bounds.x {
             self.position.x = bounds.x + bounds.width + self.radius
         } else if self.position.x - self.radius > bounds.x + bounds.width {
