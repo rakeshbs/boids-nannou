@@ -85,8 +85,8 @@ where
     }
 
     pub fn query(&self, rect: Rectangle) -> Vec<&'a T> {
-        let found: Vec<&T> = Vec::new();
-        self.query_tree(rect, found);
+        let mut found: Vec<&T> = Vec::new();
+        found = self.query_tree(rect, found);
         found
     }
 
@@ -98,10 +98,10 @@ where
                 }
             });
             if self.is_divided {
-                found = self.top_left.unwrap().query_tree(rect, found);
-                found = self.top_right.unwrap().query_tree(rect, found);
-                found = self.bottom_left.unwrap().query_tree(rect, found);
-                found = self.bottom_right.unwrap().query_tree(rect, found);
+                found = self.top_left.as_ref().unwrap().query_tree(rect, found);
+                found = self.top_right.as_ref().unwrap().query_tree(rect, found);
+                found = self.bottom_left.as_ref().unwrap().query_tree(rect, found);
+                found = self.bottom_right.as_ref().unwrap().query_tree(rect, found);
             }
         }
         found
@@ -118,10 +118,16 @@ where
             .stroke_weight(1.0)
             .stroke_color(Color::new(1.0, 1.0, 1.0, 0.3));
         if self.is_divided {
-            self.top_left.unwrap().draw(draw);
-            self.top_right.unwrap().draw(draw);
-            self.bottom_left.unwrap().draw(draw);
-            self.bottom_right.unwrap().draw(draw);
+            self.top_left.as_ref().unwrap().draw(draw);
+            self.top_right.as_ref().unwrap().draw(draw);
+            self.bottom_left.as_ref().unwrap().draw(draw);
+            self.bottom_right.as_ref().unwrap().draw(draw);
+        }
+    }
+
+    fn insert_object(node: &mut Option<Box<QuadTree<'a, T>>>, object: &'a T) {
+        if let Some(n) = node {
+            n.insert(object);
         }
     }
 
@@ -134,10 +140,11 @@ where
                     self.split();
                     self.is_divided = true;
                 }
-                self.top_left.unwrap().insert(object);
-                self.top_right.unwrap().insert(object);
-                self.bottom_left.unwrap().insert(object);
-                self.bottom_right.unwrap().insert(object);
+
+                QuadTree::insert_object(&mut self.top_left, object);
+                QuadTree::insert_object(&mut self.top_right, object);
+                QuadTree::insert_object(&mut self.bottom_left, object);
+                QuadTree::insert_object(&mut self.bottom_right, object);
             }
         }
     }
