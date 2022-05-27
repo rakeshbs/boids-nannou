@@ -11,9 +11,6 @@ pub const BOID_FOLLOW_RADIUS: f32 = 10.0;
 pub const BOID_SEPERATION_FACTOR: f32 = 0.5;
 pub const BOID_COHESION_FACTOR: f32 = 0.1;
 pub const BOID_ALIGNMENT_FACTOR: f32 = 0.02;
-//pub const BOID_SEPERATION_FACTOR: f32 = 0.7;
-//pub const BOID_COHESION_FACTOR: f32 = 0.1;
-//pub const BOID_ALIGNMENT_FACTOR: f32 = 0.10;
 
 pub struct Boid {
     pub position: Vec2,
