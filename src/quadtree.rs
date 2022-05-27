@@ -42,7 +42,6 @@ where
     T: HasLocation,
 {
     boundary: Rectangle,
-    points: Vec<Vec2>,
     objects: Vec<&'a T>,
     is_divided: bool,
     top_right: Option<Box<QuadTree<'a, T>>>,
@@ -58,7 +57,6 @@ where
     pub fn new(boundary: Rectangle) -> Self {
         QuadTree {
             boundary,
-            points: Vec::new(),
             objects: Vec::new(),
             is_divided: false,
             top_left: None,
