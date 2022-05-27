@@ -109,26 +109,24 @@ impl Simulation {
             })
             .collect();
 
-        let mut count = 0;
-        for boid in &mut (self).boids {
-            boid.apply_force(forces[count]);
-            count += 1;
-        }
+        self.boids.par_iter_mut().enumerate().for_each(|(i, b)| {
+            b.apply_force(forces[i]);
+        });
     }
 
     pub fn update(&mut self, mouse_position: Vec2) {
         self.mouse_position = mouse_position;
         //self.steer(self.mouse_position);
         self.navigate();
-        for boid in &mut self.boids {
-            boid.update(self.bounds)
-        }
+        self.boids
+            .par_iter_mut()
+            .for_each(|boid| boid.update(self.bounds));
     }
 
     pub fn draw(&self, draw: &nannou::prelude::Draw) {
         let positions: Vec<Vec3> = self
             .boids
-            .iter()
+            .par_iter()
             .map(|b| vec3(b.position.x, b.position.y, 0.0))
             .collect();
 

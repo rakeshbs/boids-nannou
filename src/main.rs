@@ -25,7 +25,7 @@ impl Model {
 fn model(app: &App) -> Model {
     let _window = app
         .new_window()
-        .fullscreen()
+        //.fullscreen()
         .event(event)
         .view(view)
         .power_preference(wgpu::PowerPreference::HighPerformance)
@@ -40,7 +40,7 @@ fn model(app: &App) -> Model {
     };
     dbg!(bounds);
     let model = Model {
-        simulation: Simulation::new(50_000, bounds),
+        simulation: Simulation::new(100_000, bounds),
         mouse_position: Vec2::new(0.0, 0.0),
         counter: 0,
     };
