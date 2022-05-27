@@ -9,4 +9,5 @@ authors = ["rakeshbs <rakeshbs@gmail.com>"]
 
 [dependencies]
 nannou = "0.18"
+rayon = "1.5.3"
 

@@ -1,6 +1,7 @@
 use crate::boid::*;
 use crate::quadtree::*;
 use nannou::{geom::*, rand};
+use rayon::prelude::*;
 use std::ops::Div;
 use std::ops::{Add, Sub};
 
@@ -66,7 +67,7 @@ impl Simulation {
 
         let forces: Vec<Vec2> = self
             .boids
-            .iter()
+            .par_iter()
             .map(|boid| {
                 let found = quadtree.query(Self::get_vehicle_rect(&boid));
 

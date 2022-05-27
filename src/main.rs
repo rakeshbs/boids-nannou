@@ -25,6 +25,7 @@ impl Model {
 fn model(app: &App) -> Model {
     let _window = app
         .new_window()
+        .fullscreen()
         .event(event)
         .view(view)
         .power_preference(wgpu::PowerPreference::HighPerformance)
@@ -39,7 +40,7 @@ fn model(app: &App) -> Model {
     };
     dbg!(bounds);
     let model = Model {
-        simulation: Simulation::new(15000, bounds),
+        simulation: Simulation::new(50_000, bounds),
         mouse_position: Vec2::new(0.0, 0.0),
         counter: 0,
     };
@@ -48,7 +49,7 @@ fn model(app: &App) -> Model {
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {
     _model.counter += 1;
-    if _model.counter > 120 {
+    if _model.counter > 60 {
         _model.counter = 0;
     }
     _model.update(_app);
@@ -60,7 +61,7 @@ fn view(app: &App, _model: &Model, frame: Frame) {
     draw.background().color(BLACK);
     _model.simulation.draw(&draw);
     if _model.counter == 0 {
-        //dbg!(app.fps());
+        dbg!(app.fps());
     }
     draw.to_frame(app, &frame).unwrap();
 }
