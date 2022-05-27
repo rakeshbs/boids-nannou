@@ -125,12 +125,6 @@ where
         }
     }
 
-    fn insert_object(node: &mut Option<Box<QuadTree<'a, T>>>, object: &'a T) {
-        if let Some(n) = node {
-            n.insert(object);
-        }
-    }
-
     pub fn insert(&mut self, object: &'a T) {
         if self.boundary.point_inside_rect(object.get_location()) {
             if self.objects.len() < MAX_CAPACITY_QUADTREE {
@@ -140,11 +134,10 @@ where
                     self.split();
                     self.is_divided = true;
                 }
-
-                QuadTree::insert_object(&mut self.top_left, object);
-                QuadTree::insert_object(&mut self.top_right, object);
-                QuadTree::insert_object(&mut self.bottom_left, object);
-                QuadTree::insert_object(&mut self.bottom_right, object);
+                self.top_left.as_mut().unwrap().insert(object);
+                self.top_right.as_mut().unwrap().insert(object);
+                self.bottom_left.as_mut().unwrap().insert(object);
+                self.bottom_right.as_mut().unwrap().insert(object);
             }
         }
     }
