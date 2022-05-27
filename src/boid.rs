@@ -2,6 +2,13 @@ use crate::quadtree::*;
 use nannou::geom::Vec2;
 use std::ops::Add;
 
+pub const BOID_BOUNDS_SIZE: f32 = 10.0;
+pub const BOID_RADIUS: f32 = 3.0;
+pub const BOID_MAX_VELOCITY: f32 = 3.0;
+pub const BOID_MAX_FORCE: f32 = 1.0;
+pub const BOID_AVOID_RADIUS: f32 = 3.0;
+pub const BOID_FOLLOW_RADIUS: f32 = 10.0;
+
 pub struct Boid {
     pub position: Vec2,
     pub velocity: Vec2,
