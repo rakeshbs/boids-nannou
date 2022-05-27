@@ -9,6 +9,9 @@ pub struct Simulation {
     mouse_position: Vec2,
     pub boids: Vec<Boid>,
     bounds: Rectangle,
+    pub boid_cohesion_factor: f32,
+    pub boid_seperation_factor: f32,
+    pub boid_alignment_factor: f32,
 }
 
 impl Simulation {
@@ -18,6 +21,9 @@ impl Simulation {
             boids: Vec::new(),
             bounds,
             mouse_position: vec2(0.0, 0.0),
+            boid_seperation_factor: BOID_SEPERATION_FACTOR,
+            boid_cohesion_factor: BOID_COHESION_FACTOR,
+            boid_alignment_factor: BOID_ALIGNMENT_FACTOR,
         };
 
         let half_width = sim.bounds.width / 2.0;
@@ -87,19 +93,16 @@ impl Simulation {
                 }
                 let mut net = vec2(0.0, 0.0);
                 if count_seperation > 0 {
-                    seperation = seperation.div(count_seperation as f32);
-                    seperation = seperation.normalize();
-                    net += seperation * 0.5;
+                    seperation = seperation.div(count_seperation as f32).normalize();
+                    net += seperation * self.boid_seperation_factor;
                 }
                 if count_cohesion > 0 {
                     cohesion = cohesion.div(count_cohesion as f32);
-                    cohesion = cohesion.sub(boid.position);
-                    cohesion = cohesion.normalize();
-                    alignment = alignment.div(count_alignment as f32);
-                    alignment = alignment.normalize();
+                    cohesion = cohesion.sub(boid.position).normalize();
+                    alignment = alignment.div(count_alignment as f32).normalize();
                     alignment *= BOID_MAX_VELOCITY;
-                    net += (alignment - boid.velocity) / 50.0;
-                    net += cohesion / 10.0;
+                    net += (alignment - boid.velocity) * self.boid_alignment_factor;
+                    net += cohesion * self.boid_cohesion_factor;
                 }
                 net
             })

@@ -25,6 +25,7 @@ impl Model {
 fn model(app: &App) -> Model {
     let _window = app
         .new_window()
+        .event(event)
         .view(view)
         .power_preference(wgpu::PowerPreference::HighPerformance)
         .build()
@@ -59,7 +60,32 @@ fn view(app: &App, _model: &Model, frame: Frame) {
     draw.background().color(BLACK);
     _model.simulation.draw(&draw);
     if _model.counter == 0 {
-        dbg!(app.fps());
+        //dbg!(app.fps());
     }
     draw.to_frame(app, &frame).unwrap();
+}
+
+fn handle_key_press(key: nannou::event::Key, simulation: &mut Simulation) {
+    use nannou::event::Key::*;
+    match key {
+        W => simulation.boid_seperation_factor += 0.1,
+        Q => simulation.boid_seperation_factor -= 0.1,
+        S => simulation.boid_cohesion_factor += 0.1,
+        A => simulation.boid_cohesion_factor -= 0.1,
+        X => simulation.boid_alignment_factor += 0.05,
+        Z => simulation.boid_alignment_factor -= 0.05,
+        _ => {}
+    }
+    dbg!(simulation.boid_seperation_factor);
+    dbg!(simulation.boid_cohesion_factor);
+    dbg!(simulation.boid_alignment_factor);
+}
+
+fn event(_app: &App, _model: &mut Model, event: WindowEvent) {
+    match event {
+        // Keyboard events
+        KeyPressed(_key) => handle_key_press(_key, &mut _model.simulation),
+        KeyReleased(_key) => {}
+        _ => {}
+    }
 }
