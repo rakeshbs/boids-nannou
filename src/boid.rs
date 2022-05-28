@@ -69,4 +69,13 @@ impl Boid {
             self.position.y = bounds.y - self.radius
         }
     }
+
+    pub fn get_perception_rect(&self) -> Rectangle {
+        Rectangle::new(
+            self.position.x - BOID_BOUNDS_SIZE / 2.0,
+            self.position.y - BOID_BOUNDS_SIZE / 2.0,
+            BOID_BOUNDS_SIZE,
+            BOID_BOUNDS_SIZE,
+        )
+    }
 }

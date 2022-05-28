@@ -69,7 +69,7 @@ impl Simulation {
             .boids
             .par_iter()
             .map(|boid| {
-                let found = quadtree.query(Self::get_vehicle_rect(&boid));
+                let found = quadtree.query(boid.get_perception_rect());
 
                 let mut seperation = Vec2::new(0.0, 0.0);
                 let mut count_seperation = 0;
@@ -137,14 +137,5 @@ impl Simulation {
         //.color(nannou::color::DARKSLATEBLUE);
         //});
         draw.point_mode().mesh().points(positions);
-    }
-
-    fn get_vehicle_rect(boid: &Boid) -> Rectangle {
-        Rectangle::new(
-            boid.position.x - BOID_BOUNDS_SIZE / 2.0,
-            boid.position.y - BOID_BOUNDS_SIZE / 2.0,
-            BOID_BOUNDS_SIZE,
-            BOID_BOUNDS_SIZE,
-        )
     }
 }
