@@ -130,12 +130,12 @@ impl Simulation {
             .map(|b| vec3(b.position.x, b.position.y, 0.0))
             .collect();
 
-        //positions.iter().for_each(|p| {
-        //draw.ellipse()
-        //.xyz(*p)
-        //.radius(BOID_RADIUS)
-        //.color(nannou::color::DARKSLATEBLUE);
-        //});
-        draw.point_mode().mesh().points(positions);
+        positions.iter().for_each(|p| {
+            draw.ellipse()
+                .xyz(*p)
+                .radius(1.4)
+                .color(nannou::color::DARKSLATEBLUE);
+        });
+        //draw.point_mode().mesh().points(positions);
     }
 }

@@ -40,7 +40,7 @@ fn model(app: &App) -> Model {
     };
     dbg!(bounds);
     let model = Model {
-        simulation: Simulation::new(70_000, bounds),
+        simulation: Simulation::new(3000, bounds),
         mouse_position: Vec2::new(0.0, 0.0),
         counter: 0,
     };

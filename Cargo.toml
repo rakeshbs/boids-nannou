@@ -8,6 +8,12 @@ authors = ["rakeshbs <rakeshbs@gmail.com>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nannou = "0.18"
+nannou = "0.19"
 rayon = "1.5.3"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
 
