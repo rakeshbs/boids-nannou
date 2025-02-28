@@ -8,3 +8,6 @@ In release mode for better performance,
     cargo run --release
 
 Press the keys W,Q,S,A,X,Z to change simulation parameters.
+
+![Demo1](./demo1.gif)
+![Demo2](./demo2.gif)
