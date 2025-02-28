@@ -114,7 +114,7 @@ where
             .height(self.boundary.height)
             .no_fill()
             .stroke_weight(1.0)
-            .stroke_color(Color::new(1.0, 1.0, 1.0, 0.3));
+            .stroke_color(Color::new(1.0, 1.0, 1.0, 0.1));
         if self.is_divided {
             self.top_left.as_ref().unwrap().draw(draw);
             self.top_right.as_ref().unwrap().draw(draw);

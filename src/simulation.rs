@@ -133,9 +133,14 @@ impl Simulation {
         positions.iter().for_each(|p| {
             draw.ellipse()
                 .xyz(*p)
-                .radius(1.4)
+                .radius(BOID_RADIUS)
                 .color(nannou::color::DARKSLATEBLUE);
         });
         //draw.point_mode().mesh().points(positions);
+        let mut quadtree: QuadTree<Boid> = QuadTree::new(self.bounds);
+        for boid in self.boids.iter() {
+            quadtree.insert(boid);
+        }
+        quadtree.draw(draw);
     }
 }
