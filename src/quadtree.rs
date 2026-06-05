@@ -1,37 +1,7 @@
 use nannou::{draw::mesh::vertex::Color, prelude::Vec2};
+use crate::spatial_hash::Rectangle;
 
 const MAX_CAPACITY_QUADTREE: usize = 4;
-#[derive(Debug, Copy, Clone)]
-pub struct Rectangle {
-    pub x: f32,
-    pub y: f32,
-    pub width: f32,
-    pub height: f32,
-}
-
-impl Rectangle {
-    pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
-        Rectangle {
-            x,
-            y,
-            width,
-            height,
-        }
-    }
-
-    pub fn intersects(&self, rect: &Rectangle) -> bool {
-        !(rect.x > self.x + self.width
-            || rect.x + rect.width < self.x
-            || rect.y > self.y + self.height
-            || rect.y + rect.height < self.y)
-    }
-    pub fn point_inside_rect(&self, point: Vec2) -> bool {
-        self.x <= point.x
-            && self.y <= point.y
-            && self.x + self.width > point.x
-            && self.y + self.height > point.y
-    }
-}
 
 pub trait HasLocation {
     fn get_location(&self) -> Vec2;

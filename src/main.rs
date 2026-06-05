@@ -1,9 +1,6 @@
-mod boid;
-mod quadtree;
-mod simulation;
 use nannou::prelude::*;
-use quadtree::Rectangle;
-use simulation::Simulation;
+use steering::spatial_hash::Rectangle;
+use steering::simulation::Simulation;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -40,7 +37,7 @@ fn model(app: &App) -> Model {
     };
     dbg!(bounds);
     let model = Model {
-        simulation: Simulation::new(150, bounds),
+        simulation: Simulation::new(1000000, bounds),
         mouse_position: Vec2::new(0.0, 0.0),
         counter: 0,
     };
@@ -57,7 +54,7 @@ fn update(_app: &App, _model: &mut Model, _update: Update) {
 
 fn view(app: &App, _model: &Model, frame: Frame) {
     let draw = app.draw();
-    let w_rect = app.window_rect();
+    let _w_rect = app.window_rect();
     draw.background().color(BLACK);
     _model.simulation.draw(&draw);
     if _model.counter == 0 {

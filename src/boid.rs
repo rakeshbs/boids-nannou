@@ -1,4 +1,5 @@
-use crate::quadtree::*;
+use crate::spatial_hash::*;
+use crate::quadtree::HasLocation;
 use nannou::geom::Vec2;
 use std::ops::Add;
 
@@ -12,6 +13,7 @@ pub const BOID_SEPERATION_FACTOR: f32 = 0.5;
 pub const BOID_COHESION_FACTOR: f32 = 0.1;
 pub const BOID_ALIGNMENT_FACTOR: f32 = 0.02;
 
+#[derive(Clone)]
 pub struct Boid {
     pub position: Vec2,
     pub velocity: Vec2,
