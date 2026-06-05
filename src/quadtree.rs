@@ -124,19 +124,37 @@ where
     }
 
     pub fn insert(&mut self, object: &'a T) {
-        if self.boundary.point_inside_rect(object.get_location()) {
-            if self.objects.len() < MAX_CAPACITY_QUADTREE {
-                self.objects.push(object);
-            } else {
-                if !self.is_divided {
-                    self.split();
-                    self.is_divided = true;
-                }
-                self.top_left.as_mut().unwrap().insert(object);
-                self.top_right.as_mut().unwrap().insert(object);
-                self.bottom_left.as_mut().unwrap().insert(object);
-                self.bottom_right.as_mut().unwrap().insert(object);
+        if !self.boundary.point_inside_rect(object.get_location()) {
+            return;
+        }
+
+        if !self.is_divided && self.objects.len() < MAX_CAPACITY_QUADTREE {
+            self.objects.push(object);
+            return;
+        }
+
+        if !self.is_divided {
+            self.split();
+            let objs = std::mem::take(&mut self.objects);
+            for obj in objs {
+                self.insert_into_children(obj);
             }
+            self.is_divided = true;
+        }
+
+        self.insert_into_children(object);
+    }
+
+    fn insert_into_children(&mut self, object: &'a T) {
+        let loc = object.get_location();
+        if self.top_left.as_ref().unwrap().boundary.point_inside_rect(loc) {
+            self.top_left.as_mut().unwrap().insert(object);
+        } else if self.top_right.as_ref().unwrap().boundary.point_inside_rect(loc) {
+            self.top_right.as_mut().unwrap().insert(object);
+        } else if self.bottom_left.as_ref().unwrap().boundary.point_inside_rect(loc) {
+            self.bottom_left.as_mut().unwrap().insert(object);
+        } else if self.bottom_right.as_ref().unwrap().boundary.point_inside_rect(loc) {
+            self.bottom_right.as_mut().unwrap().insert(object);
         }
     }
 }
